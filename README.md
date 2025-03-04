@@ -16,8 +16,12 @@ An extension to crowd source facts to show for YouTube Videos.
 
 3. Is fact report identifiable?
 
-> No reports are fully anonymized however sources must be public and authoratative statements.
+> No reports are fully anonymized however sources must be public and authoratative statements. All collected data will be served publicly for others to see.
 
 ## Sequence Diagram
 
 ![Sequence Diagram](./asset/ytfchkseqd.svg)
+
+## Credits
+
+This extension is very inspired from Sponsorblock and Twitter(X)'s fact checking mechanisms.
