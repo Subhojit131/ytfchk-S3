@@ -27,12 +27,16 @@
     "eslint-config-prettier": "^10.1.1",
     "eslint-plugin-prettier": "^5.2.3",
     "globals": "^16.0.0",
-    "prettier": "^3.5.3",
-    "husky": "^9.0.11",
-    "lint-staged": "^15.2.0"
+    "lint-staged": "^15.2.0",
+    "prettier": "^3.5.3"
   },
   "lint-staged": {
-    "src/**/*.js": ["eslint --fix", "prettier --write"]
+    "src/**/*.js": [
+      "eslint --fix",
+      "prettier --write"
+    ]
+  },
+  "dependencies": {
+    "husky": "^9.1.7"
   }
 }
-
