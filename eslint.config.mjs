@@ -19,7 +19,7 @@ export default [
     rules: {
       "no-unused-vars": "warn",
       "semi": ["error", "always"],
-      "quotes": ["error", "double"],
+      "quotes": ["error", "single"],
       "eqeqeq": "error",
       "prettier/prettier": "error", // Enforce Prettier as an ESLint rule
     },
