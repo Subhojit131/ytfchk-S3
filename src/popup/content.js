@@ -1,19 +1,21 @@
 function insertFactCheckerForm() {
-    let formContainer = null; // Track the form container globally
-    let isFormClosed = false; // Track if the form is manually closed
+  let formContainer = null; // Track the form container globally
+  let isFormClosed = false; // Track if the form is manually closed
 
-    const checkForButton = () => {
-        if (isFormClosed) return; 
+  const checkForButton = () => {
+    if (isFormClosed) return;
 
-        let subscribeButton = document.querySelector("#subscribe-button ytd-subscribe-button-renderer");
-        let existingForm = document.getElementById("fact-check-form-container");
+    let subscribeButton = document.querySelector(
+      "#subscribe-button ytd-subscribe-button-renderer"
+    );
+    let existingForm = document.getElementById("fact-check-form-container");
 
-        if (subscribeButton && !existingForm) {
-            formContainer = document.createElement("div");
-            formContainer.id = "fact-check-form-container";
+    if (subscribeButton && !existingForm) {
+      formContainer = document.createElement("div");
+      formContainer.id = "fact-check-form-container";
 
-            let style = document.createElement("style");
-            style.textContent = `
+      let style = document.createElement("style");
+      style.textContent = `
                 #fact-check-form-container {
                     position: absolute;
                     padding: 15px;
@@ -90,9 +92,9 @@ function insertFactCheckerForm() {
                     padding-right: 15px;
                 }
             `;
-            document.head.appendChild(style);
+      document.head.appendChild(style);
 
-            formContainer.innerHTML = `
+      formContainer.innerHTML = `
                 <div id="close-button">×</div>
                 <header>
                     <nav>
@@ -120,143 +122,155 @@ function insertFactCheckerForm() {
                 <div id="report-container"></div>
             `;
 
-            document.body.appendChild(formContainer);
+      document.body.appendChild(formContainer);
 
-            
-            const rect = subscribeButton.getBoundingClientRect();
-            let leftPosition = window.scrollX + rect.right + 15;
-            let topPosition = window.scrollY + rect.top;
+      const rect = subscribeButton.getBoundingClientRect();
+      let leftPosition = window.scrollX + rect.right + 15;
+      let topPosition = window.scrollY + rect.top;
 
-            if (leftPosition + 320 > window.innerWidth) {
-                leftPosition = window.scrollX + rect.left - 320;
+      if (leftPosition + 320 > window.innerWidth) {
+        leftPosition = window.scrollX + rect.left - 320;
+      }
+
+      formContainer.style.top = `${topPosition}px`;
+      formContainer.style.left = `${leftPosition}px`;
+
+      function updateVideoUrl() {
+        let videoInput = document.getElementById("video-url");
+        if (videoInput) {
+          videoInput.value = window.location.href;
+        }
+      }
+
+      updateVideoUrl();
+      setInterval(updateVideoUrl, 2000);
+
+      // Close button functionality
+      const closeButton = document.getElementById("close-button");
+      if (closeButton) {
+        closeButton.addEventListener("click", function (event) {
+          event.stopPropagation();
+          console.log("Close button clicked");
+          if (formContainer && formContainer.parentNode) {
+            formContainer.remove();
+            isFormClosed = true;
+            console.log("Form container removed");
+          } else {
+            console.error("Form container not found or already removed");
+          }
+        });
+      } else {
+        console.error("Close button not found!");
+      }
+
+      document
+        .getElementById("report-form")
+        .addEventListener("submit", function (event) {
+          event.preventDefault();
+          const videoUrl = document.getElementById("video-url").value.trim();
+          const issue = document.getElementById("issue").value.trim();
+          const correctSource = document
+            .getElementById("correct-source")
+            .value.trim();
+
+          if (!videoUrl || !issue || !correctSource) {
+            alert("All fields are required!");
+            return;
+          }
+
+          chrome.storage.local.get({ reports: {} }, function (data) {
+            let reports = data.reports;
+
+            if (!reports[videoUrl]) {
+              reports[videoUrl] = [];
             }
 
-            formContainer.style.top = `${topPosition}px`;
-            formContainer.style.left = `${leftPosition}px`;
+            // Add new report
+            const report = {
+              issue,
+              correctSource,
+              timestamp: new Date().toISOString(),
+            };
+            reports[videoUrl].push(report);
 
-           
-            function updateVideoUrl() {
-                let videoInput = document.getElementById("video-url");
-                if (videoInput) {
-                    videoInput.value = window.location.href;
+            chrome.runtime.sendMessage(
+              {
+                action: "submitReport",
+                payload: {
+                  videoUrl: videoUrl,
+                  issue: issue,
+                  correctSource: correctSource,
+                },
+              },
+              (response) => {
+                console.log("Response from background.js:", response);
+                if (response && response.status === "success") {
+                  alert("Report submitted successfully!");
+                  document.getElementById("report-form").reset();
+                  showReports();
+                } else {
+                  alert("Failed to submit the report.");
                 }
-            }
+              }
+            );
+          });
+        });
 
-            updateVideoUrl();
-            setInterval(updateVideoUrl, 2000);
+      document
+        .getElementById("display-link")
+        .addEventListener("click", function (event) {
+          event.preventDefault();
+          document.getElementById("report-form").style.display = "none";
+          document.getElementById("report-container").style.display = "block";
+          showReports();
+        });
 
-            // Close button functionality
-            const closeButton = document.getElementById("close-button");
-            if (closeButton) {
-                closeButton.addEventListener("click", function (event) {
-                    event.stopPropagation(); 
-                    console.log("Close button clicked"); 
-                    if (formContainer && formContainer.parentNode) {
-                        formContainer.remove(); 
-                        isFormClosed = true;
-                        console.log("Form container removed"); 
-                    } else {
-                        console.error("Form container not found or already removed"); 
-                    }
-                });
-            } else {
-                console.error("Close button not found!"); 
-            }
+      document
+        .getElementById("home-link")
+        .addEventListener("click", function (event) {
+          event.preventDefault();
+          document.getElementById("report-form").style.display = "block";
+          document.getElementById("report-container").style.display = "none";
+        });
 
-            document.getElementById("report-form").addEventListener("submit", function (event) {
-                event.preventDefault();
-                const videoUrl = document.getElementById("video-url").value.trim();
-                const issue = document.getElementById("issue").value.trim();
-                const correctSource = document.getElementById("correct-source").value.trim();
+      function showReports() {
+        chrome.storage.local.get({ reports: {} }, function (data) {
+          const reports = data.reports;
+          const reportContainer = document.getElementById("report-container");
+          reportContainer.innerHTML = "<h2>Submitted Reports</h2>";
 
-                if (!videoUrl || !issue || !correctSource) {
-                    alert("All fields are required!");
-                    return;
-                }
+          if (Object.keys(reports).length === 0) {
+            reportContainer.innerHTML += "<p>No reports submitted yet.</p>";
+            return;
+          }
 
-                chrome.storage.local.get({ reports: {} }, function (data) {
-                    let reports = data.reports;
-
-                    
-                    if (!reports[videoUrl]) {
-                        reports[videoUrl] = [];
-                    }
-
-                    // Add new report
-                    const report = { issue, correctSource, timestamp: new Date().toISOString() };
-                    reports[videoUrl].push(report);
-
-                    chrome.runtime.sendMessage({
-                        action: "submitReport",
-                        payload: {
-                            videoUrl: videoUrl,
-                            issue: issue,
-                            correctSource: correctSource
-                        }
-                    }, (response) => {
-                        console.log("Response from background.js:", response);
-                        if (response && response.status === "success") {
-                            alert("Report submitted successfully!");
-                            document.getElementById("report-form").reset();
-                            showReports();
-                        } else {
-                            alert("Failed to submit the report.");
-                        }
-                    });
-                });
-            });
-
-            document.getElementById("display-link").addEventListener("click", function (event) {
-                event.preventDefault();
-                document.getElementById("report-form").style.display = "none";
-                document.getElementById("report-container").style.display = "block";
-                showReports();
-            });
-
-            document.getElementById("home-link").addEventListener("click", function (event) {
-                event.preventDefault();
-                document.getElementById("report-form").style.display = "block";
-                document.getElementById("report-container").style.display = "none";
-            });
-
-            function showReports() {
-                chrome.storage.local.get({ reports: {} }, function (data) {
-                    const reports = data.reports;
-                    const reportContainer = document.getElementById("report-container");
-                    reportContainer.innerHTML = "<h2>Submitted Reports</h2>";
-
-                    if (Object.keys(reports).length === 0) {
-                        reportContainer.innerHTML += "<p>No reports submitted yet.</p>";
-                        return;
-                    }
-
-                    Object.entries(reports).forEach(([videoUrl, reportList]) => {
-                        reportContainer.innerHTML += `
+          Object.entries(reports).forEach(([videoUrl, reportList]) => {
+            reportContainer.innerHTML += `
                             <hr>
                             <h3>Reports for Video: <a href="${videoUrl}" target="_blank">${videoUrl}</a></h3>
                         `;
 
-                        reportList.forEach((report, index) => {
-                            reportContainer.innerHTML += `
+            reportList.forEach((report, index) => {
+              reportContainer.innerHTML += `
                                 <p><strong>Report #${index + 1}</strong></p>
                                 <p><strong>Issue:</strong> ${report.issue}</p>
                                 <p><strong>Correct Source:</strong> <a href="${report.correctSource}" target="_blank">${report.correctSource}</a></p>
                                 <p><strong>Submitted on:</strong> ${new Date(report.timestamp).toLocaleString()}</p>
                                 <hr>
                             `;
-                        });
-                    });
-                });
-            }
-        } else if (!subscribeButton && existingForm) {
-            existingForm.remove(); // Remove the form if the subscribe button disappears
-        }
-    };
+            });
+          });
+        });
+      }
+    } else if (!subscribeButton && existingForm) {
+      existingForm.remove(); // Remove the form if the subscribe button disappears
+    }
+  };
 
-    const observer = new MutationObserver(() => checkForButton());
-    observer.observe(document.body, { childList: true, subtree: true });
+  const observer = new MutationObserver(() => checkForButton());
+  observer.observe(document.body, { childList: true, subtree: true });
 
-    checkForButton();
+  checkForButton();
 }
 
 insertFactCheckerForm();

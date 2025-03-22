@@ -7,7 +7,10 @@ import pluginPrettier from "eslint-plugin-prettier";
 export default [
   {
     languageOptions: {
-      globals: globals.browser,
+      globals: {
+        ...globals.browser, // Correctly applies browser globals
+        chrome: "readonly", //explicitly add chrome
+      },
       ecmaVersion: "latest",
       sourceType: "module",
     },
@@ -18,12 +21,11 @@ export default [
     plugins: { prettier: pluginPrettier },
     rules: {
       "no-unused-vars": "warn",
-      "semi": ["error", "always"],
-      "quotes": ["error", "single"],
-      "eqeqeq": "error",
+      semi: ["error", "always"],
+      quotes: ["error", "single"],
+      eqeqeq: "error",
       "prettier/prettier": "error", // Enforce Prettier as an ESLint rule
     },
   },
   prettier, // Disables ESLint rules that conflict with Prettier
 ];
-
