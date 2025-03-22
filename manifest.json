@@ -1,10 +1,21 @@
 {
-	"name": "YT_FCKK",
-	"description": "Crowd Sourced Fact Checker for YouTube",
-	"version": "1.0",
-	"manifest_version": 3,
-	"action": {
-		"default_popup": ""
-		"default_icon" : ""
-	}
+  "name": "YouTube Fact Checker",
+  "description": "Crowd Sourced Fact Checker for YouTube",
+  "version": "1.0",
+  "manifest_version": 3,
+  "permissions": ["activeTab", "scripting", "tabs", "storage"],
+  "host_permissions": ["https://www.youtube.com/*"],
+  "action": {
+    "default_popup": "src/popup/popup.html",
+    "default_icon": "icon.png"
+  },
+  "background": {
+    "service_worker": "src/popup/background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://www.youtube.com/*"],
+      "js": ["src/popup/content.js"]
+    }
+  ]
 }

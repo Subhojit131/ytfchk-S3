@@ -12,7 +12,7 @@ An extension to crowd source facts to show for YouTube Videos.
 
 2. How is botting/manipulation mitigated?
 
->  Since this is a learning project, we are working actively on strategies to minimise this. For now, we rely on authoratative & valid resource to fact report matching and mass upvoting.
+> Since this is a learning project, we are working actively on strategies to minimise this. For now, we rely on authoratative & valid resource to fact report matching and mass upvoting.
 
 3. Is fact report identifiable?
 

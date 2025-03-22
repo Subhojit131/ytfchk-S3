@@ -5,9 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "lint": "eslint src/ --fix",
-    "format": "prettier --write src/",
-    "prepare": "husky install"
+    "lint": "eslint . --fix",
+    "format": "prettier --write .",
+    "prepare": "husky"
   },
   "repository": {
     "type": "git",
@@ -27,6 +27,7 @@
     "eslint-config-prettier": "^10.1.1",
     "eslint-plugin-prettier": "^5.2.3",
     "globals": "^16.0.0",
+    "husky": "^9.1.7",
     "lint-staged": "^15.2.0",
     "prettier": "^3.5.3"
   },
@@ -35,8 +36,5 @@
       "eslint --fix",
       "prettier --write"
     ]
-  },
-  "dependencies": {
-    "husky": "^9.1.7"
   }
 }
