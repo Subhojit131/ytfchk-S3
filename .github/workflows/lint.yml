@@ -1,4 +1,4 @@
-name: Lint & Format
+name: Lint & Format Check
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
     branches: [main, Sdev, bdev]
 
 jobs:
-  lint:
+  lint-check:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -17,13 +17,13 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'npm'
+          cache: "npm"
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Run ESLint
-        run: npx eslint src/ --no-ignore--fix
+      - name: Run ESLint (Check Only)
+        run: npx eslint .
 
-      - name: Run Prettier
-        run: npx prettier --write src/
+      - name: Run Prettier (Check Only)
+        run: npx prettier --check .
